@@ -17,27 +17,34 @@ import {
   ImVolumeMedium,
   ImVolumeHigh,
 } from "react-icons/im";
-import { useAudio } from "react-use";
+import { useAudio, useFullscreen, useToggle } from "react-use";
 import { secondsToTime } from "../../Utils";
 import CustomRange from "../CustomRange";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setControls,setPlaying,setSidebar } from "../../redux/Player";
+import { setControls, setPlaying, setSidebar } from "../../redux/Player";
+import FullScreenPlayer from "../FullScreenPlayer";
 
 const Player = () => {
+  const FsRef = useRef();
+  const [show, toggle] = useToggle(false);
   const { current, sidebar } = useSelector((state) => state.player);
   const dispatch = useDispatch();
   const [audio, state, controls, ref] = useAudio({
     src: current?.src,
   });
 
+  const isFullscreen = useFullscreen(FsRef, show, {
+    onClose: () => toggle(false),
+  });
+
   useEffect(() => {
     controls.play();
   }, [current]);
 
-  useEffect(()=>{
-      dispatch(setPlaying(state.playing))
-    },[state.playing])
+  useEffect(() => {
+    dispatch(setPlaying(state.playing));
+  }, [state.playing]);
 
   useEffect(() => {
     dispatch(setControls(controls));
@@ -71,9 +78,10 @@ const Player = () => {
                       alt=""
                       className="w-16 h-16 object-cover"
                     />
-                    <button 
-                    onClick={()=>dispatch(setSidebar(true))}
-                    className="flex items-center w-6 h-6 justify-center cursor-pointer opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:scale-[1.1] rounded-full absolute top-1 right-1  bg-black ">
+                    <button
+                      onClick={() => dispatch(setSidebar(true))}
+                      className="flex items-center w-6 h-6 justify-center cursor-pointer opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:scale-[1.1] rounded-full absolute top-1 right-1  bg-black "
+                    >
                       <MdKeyboardArrowUp className="text-xl" />
                     </button>
                   </div>
@@ -166,10 +174,20 @@ const Player = () => {
             }}
           />
         </div>
-        <button className="flex items-center w-8 h-8 justify-center text-white text-opacity-70 hover:text-opacity-100">
+        <button 
+        onClick={toggle}
+        className="flex items-center w-8 h-8 justify-center text-white text-opacity-70 hover:text-opacity-100">
           <AiOutlineFullscreen className="text-xl" />
         </button>
       </div>
+      <div ref={FsRef}>{isFullscreen &&
+         <FullScreenPlayer
+         toggle={toggle}
+         state={state}
+         controls={controls}
+         audio={audio}
+         volumeIcon={volumeIcon}
+         />}</div>
     </div>
   );
 };

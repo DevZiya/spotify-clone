@@ -8,7 +8,7 @@ const Navigation = () => {
   const history = useHistory();
 
   return (
-    <div className="icons flex gap-x-3 w-full">
+    <div className="icons flex gap-x-3 w-auto">
       <div className="left bg-black rounded-full flex items-center justify-center w-8 h-8"
       onClick={()=>history.goBack()}
       >
